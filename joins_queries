@@ -1,0 +1,180 @@
+-- Listar vendas junto com o nome do produto vendido
+SELECT 
+    S.Sale_Id,
+    P.Product_Name,
+    S.Quantity,
+    S.Sale_Amount
+FROM 
+    Sales$ S
+JOIN Products$ P ON S.Product_Id = P.Product_Id
+
+
+-- Listar vendas junto com o nome do funcionário responsável
+SELECT 
+    S.Sale_Id,
+    E.Employee_Name,
+    S.Quantity,
+    S.Sale_Amount
+FROM 
+    Sales$ S
+JOIN Employees$ E ON S.Employee_Id = E.Employee_Id
+
+
+-- Listar vendas junto com o nome da loja onde aconteceram
+SELECT
+    S.Sale_Id,
+    ST.Store_Name,
+    S.Quantity,
+    S.Sale_Amount
+FROM 
+    Sales$ S
+JOIN Stores$ ST ON S.Store_Id = ST.Store_Id
+
+
+-- Trazer vendas completas: produto, funcionário e loja (multíplos JOINS)
+SELECT 
+    S.Sale_Id,
+    P.Product_Name,
+    E.Employee_Name,
+    ST.Store_Name,
+    S.Quantity,
+    S.Sale_Amount
+FROM 
+    Sales$ S
+JOIN Products$ P ON S.Product_Id = P.Product_Id
+JOIN Employees$ E ON S.Employee_Id = E.Employee_Id
+JOIN Stores$ ST ON S.Store_Id = ST.Store_Id
+
+
+-- Mostrar produtos e suas vendas (incluindo produtos nunca vendidos)
+SELECT 
+    P.Product_Id,
+    P.Product_Name,
+    S.Sale_Id,
+    S.Quantity,
+    S.Sale_Amount
+FROM 
+    Products$ P
+LEFT JOIN Sales$ S ON P.Product_Id = S.Product_Id
+
+
+-- Funcionários e suas vendas (inclui funcionários que nunca venderam)
+SELECT 
+    E.Employee_Id,
+    E.Employee_Name,
+    S.Sale_Id,
+    S.Sale_Amount
+FROM 
+    Employees$ E
+LEFT JOIN Sales$ S ON E.Employee_Id = S.Employee_Id
+
+
+-- Lojas sem nenhuma venda registrada
+SELECT 
+    ST.Store_Id,
+    ST.Store_Name
+FROM 
+    Stores$ ST
+LEFT JOIN Sales$ S ON ST.Store_Id = S.Store_Id
+WHERE S.Sale_Id IS NULL
+
+
+-- Produtos que já foram vendidos pelo menos uma vez (sem repetir)
+SELECT DISTINCT
+    P.Product_Id,
+    P.Product_Name
+FROM 
+    Products$ P
+JOIN Sales$ S ON P.Product_Id = S.Product_Id
+
+
+-- Funcionários que realizaram vendas acima de R$ 1000
+SELECT DISTINCT
+    E.Employee_Id,
+    E.Employee_Name
+FROM 
+    Employees$ E
+JOIN Sales$ S ON E.Employee_Id = S.Employee_Id
+WHERE S.Sale_Amount > 1000
+
+
+-- Lojas com mais de 50 funcionários e que já tiveram vendas
+SELECT DISTINCT
+    ST.Store_Id,
+    ST.Store_Name,
+    ST.Employee_Count
+FROM 
+    Stores$ ST
+JOIN Sales$ S ON ST.Store_Id = S.Store_Id
+WHERE ST.Employee_Count > 50
+
+
+-- Total de receita gerada por cada produto
+SELECT 
+    p.Product_Name,
+    SUM(s.Sale_Amount) AS Total_Vendas
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+GROUP BY p.Product_Name
+
+
+-- Total de receita gerada por cada produto
+SELECT 
+    p.Product_Name,
+    SUM(s.Sale_Amount) AS Total_Vendas
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+GROUP BY p.Product_Name
+
+
+-- Soma das unidades vendidas por produto
+SELECT 
+    p.Product_Name,
+    SUM(s.Quantity) AS Total_Unidades
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+GROUP BY p.Product_Name
+
+
+-- Total faturado por cada loja
+SELECT 
+    st.Store_Name,
+    SUM(s.Sale_Amount) AS Total_Loja
+FROM 
+    Sales$ s
+JOIN Stores$ st ON s.Store_Id = st.Store_Id
+GROUP BY st.Store_Name
+
+
+-- Quanto cada funcionário vendeu em valor
+SELECT 
+    e.Employee_Name,
+    SUM(s.Sale_Amount) AS Total_Vendido
+FROM 
+    Sales$ s
+JOIN Employees$ e ON s.Employee_Id = e.Employee_Id
+GROUP BY e.Employee_Name
+
+
+
+-- Valor médio das vendas por loja
+SELECT 
+    st.Store_Name,
+    AVG(s.Sale_Amount) AS Ticket_Medio
+FROM 
+    Sales$ s
+JOIN Stores$ st ON s.Store_Id = st.Store_Id
+GROUP BY st.Store_Name
+
+
+-- Total de vendas agrupado por categoria de produto
+SELECT 
+    p.Product_Category,
+    SUM(s.Sale_Amount) AS Total_Categoria
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+GROUP BY p.Product_Category
