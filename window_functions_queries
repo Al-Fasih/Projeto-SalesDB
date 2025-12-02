@@ -1,0 +1,66 @@
+-- Ranking dos funcionários pelo total vendido
+SELECT
+    e.Employee_Name,
+    SUM(s.Sale_Amount) AS Total_Vendido,
+    RANK() OVER (ORDER BY SUM(s.Sale_Amount) DESC) AS Ranking
+FROM 
+    Sales$ s
+JOIN Employees$ e ON s.Employee_Id = e.Employee_Id
+GROUP BY e.Employee_Name
+
+
+-- Ranking dos funcionários dentro de cada loja, baseado no valor vendido
+SELECT
+    st.Store_Name,
+    e.Employee_Name,
+    SUM(s.Sale_Amount) AS Total_Vendido,
+    RANK() OVER (PARTITION BY st.Store_Name ORDER BY SUM(s.Sale_Amount) DESC) AS Ranking_Local
+FROM 
+    Sales$ s
+JOIN Employees$ e ON s.Employee_Id = e.Employee_Id
+JOIN Stores$ st ON s.Store_Id = st.Store_Id
+GROUP BY st.Store_Name, e.Employee_Name
+
+
+-- Média móvel do valor das vendas de cada produto
+SELECT
+    p.Product_Name,
+    s.Sale_Amount,
+    AVG(s.Sale_Amount) OVER (
+        PARTITION BY p.Product_Name
+        ORDER BY s.Sale_Id
+        ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+    ) AS Media_Movel
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+
+
+-- Quanto cada venda representa do total de vendas de cada produto
+SELECT
+    p.Product_Name,
+    s.Sale_Amount,
+    s.Sale_Amount * 100.0 
+        / SUM(s.Sale_Amount) OVER (PARTITION BY p.Product_Name) AS Percentual_Produto
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+
+
+-- Top 3 produtos mais vendidos dentro de cada categoria
+SELECT *
+FROM (
+    SELECT
+        p.Product_Category,
+        p.Product_Name,
+        SUM(s.Sale_Amount) AS Total_Vendido,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.Product_Category 
+            ORDER BY SUM(s.Sale_Amount) DESC
+        ) AS Posicao
+    FROM 
+        Sales$ s
+    JOIN Products$ p ON s.Product_Id = p.Product_Id
+    GROUP BY p.Product_Category, p.Product_Name
+) t
+WHERE Posicao <= 3;
