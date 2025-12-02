@@ -1,0 +1,89 @@
+-- Produtos com preço maior que a média dos preços
+SELECT 
+    Product_Name,
+    Unit_Price
+FROM 
+    Products$
+WHERE Unit_Price > (
+    SELECT AVG(Unit_Price) FROM Products$
+)
+
+
+-- Produtos que apareceram em pelo menos uma venda
+SELECT 
+    Product_Id,
+    Product_Name
+FROM 
+    Products$
+WHERE Product_Id IN (
+    SELECT DISTINCT Product_Id
+    FROM 
+        Sales$
+)
+
+
+-- Produtos que nunca foram vendidos
+SELECT 
+    Product_Id,
+    Product_Name
+FROM 
+    Products$
+WHERE Product_Id NOT IN (
+    SELECT DISTINCT 
+        Product_Id 
+    FROM 
+        Sales$
+)
+
+
+-- Calcula o total de vendas de cada produto usando subquery correlacionada
+SELECT 
+    p.Product_Name,
+    (SELECT 
+        SUM(s.Sale_Amount)
+     FROM 
+        Sales$ s
+     WHERE s.Product_Id = p.Product_Id
+    ) AS Total_Vendido
+FROM 
+    Products$ p
+
+
+-- Lojas que já tiveram vendas
+SELECT 
+    Store_Id,
+    Store_Name
+FROM 
+    Stores$ st
+WHERE EXISTS (
+    SELECT 1
+    FROM 
+        Sales$ s
+    WHERE s.Store_Id = st.Store_Id
+)
+
+
+-- Funcionários sem nenhuma venda registrada
+SELECT 
+    Employee_Id,
+    Employee_Name
+FROM 
+    Employees$ e
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM 
+        Sales$ s
+    WHERE s.Employee_Id = e.Employee_Id
+)
+
+
+-- Para cada loja, mostra o total de vendas
+SELECT
+    Store_Name,
+    (SELECT SUM(s.Sale_Amount)
+     FROM 
+        Sales$ s
+     WHERE s.Store_Id = st.Store_Id
+    ) AS Total_Loja
+FROM 
+    Stores$ st
