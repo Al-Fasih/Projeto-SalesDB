@@ -1,0 +1,99 @@
+--Quais os produtos mais lucrativos da empresa?
+SELECT 
+    p.Product_Name,
+    SUM(s.Sale_Amount) AS Receita_Total
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+GROUP BY p.Product_Name
+ORDER BY Receita_Total DESC
+
+
+--Quais categorias geram mais faturamento?
+SELECT 
+    p.Product_Category,
+    SUM(s.Sale_Amount) AS Total
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+GROUP BY p.Product_Category
+ORDER BY Total DESC
+
+
+--Quais lojas tem maior faturamento?
+SELECT 
+    st.Store_Name,
+    SUM(s.Sale_Amount) AS Total
+FROM 
+    Sales$ s
+JOIN Stores$ st ON s.Store_Id = st.Store_Id
+GROUP BY st.Store_Name
+ORDER BY Total DESC
+
+
+--Quais funcionários mais vendem?
+SELECT 
+    e.Employee_Name,
+    SUM(s.Sale_Amount) AS Total_Revenue
+FROM 
+    Sales$ s
+JOIN Employees$ e ON s.Employee_Id = e.Employee_Id
+GROUP BY e.Employee_Name
+ORDER BY Total_Revenue DESC
+
+
+
+--Qual funcionário mais vende dentro de cada loja?
+--Consulta complexa usando JOIN, WINDOW FUNCTIONS, SUBQUERIE, AGREGAÇÃO
+SELECT 
+    Store_Name,
+    Employee_Name,
+    Receita_Total
+FROM (
+    SELECT
+        st.Store_Name,
+        e.Employee_Name,
+        SUM(s.Sale_Amount) AS Receita_Total,
+        RANK() OVER (
+            PARTITION BY st.Store_Name 
+            ORDER BY SUM(s.Sale_Amount) DESC
+        ) AS Ranking
+    FROM 
+        Sales$ s
+    JOIN Employees$ e ON s.Employee_Id = e.Employee_Id
+    JOIN Stores$ st ON s.Store_Id = st.Store_Id
+    GROUP BY st.Store_Name, e.Employee_Name
+) t
+WHERE t.Ranking = 1
+
+
+--Quais lojas tem baixa performance (abaixo da média)
+SELECT
+    st.Store_Name,
+    SUM(s.Sale_Amount) AS Total_Revenue
+FROM 
+    Sales$ s
+JOIN Stores$ st ON s.Store_Id = st.Store_Id
+GROUP BY st.Store_Name
+HAVING SUM(s.Sale_Amount) < (
+    SELECT 
+        AVG(TotalPorLoja)
+    FROM (
+        SELECT 
+            SUM(Sale_Amount) AS TotalPorLoja
+        FROM 
+            Sales$
+        GROUP BY Store_Id
+    ) x
+)
+
+
+--Quais produtos tem mais unidades vendidas?
+SELECT 
+    p.Product_Name,
+    SUM(s.Quantity) AS Unidades_Vendidas
+FROM 
+    Sales$ s
+JOIN Products$ p ON s.Product_Id = p.Product_Id
+GROUP BY p.Product_Name
+ORDER BY Unidades_Vendidas DESC
