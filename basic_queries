@@ -1,0 +1,95 @@
+--Exibição de todos os produtos com preço e categoria
+SELECT 
+    Product_Id,
+    Product_Name,
+    Product_Category,
+    Unit_Price
+FROM 
+    Products$
+
+--Clientes com maior renda anual
+SELECT 
+    Customer_Id,
+    Customer_Name,
+    Yearly_Income,
+    Gender
+FROM 
+    Customers$
+ORDER BY Yearly_Income DESC
+
+--Funcionários que ganham mais de 8000
+SELECT 
+    Employee_Id,
+    Employee_Name,
+    Salary,
+    Title
+FROM 
+    Employees$
+WHERE Salary > 8000
+ORDER BY Salary DESC
+
+--Lojas ativas
+SELECT 
+    Store_Id,
+    Store_Name,
+    Employee_Count,
+    Status
+FROM 
+    Stores$
+WHERE Status = 'Active'
+
+--Vendas com quantidade maior que 5
+SELECT 
+    Sale_Id,
+    Product_Id,
+    Store_Id,
+    Employee_Id,
+    Quantity,
+    Sale_Amount
+FROM  
+    Sales$
+WHERE Quantity > 5
+
+--Produtos com preço acima da média
+SELECT 
+    Product_Id,
+    Product_Name,
+    Unit_Price
+FROM 
+    Products$
+WHERE Unit_Price > (SELECT AVG(Unit_Price) FROM Products$)
+
+--Clientes com mais de 50 anos
+SELECT 
+    Customer_Id,
+    Customer_Name,
+    Birth_Date
+FROM 
+    Customers$
+WHERE DATEDIFF(YEAR, Birth_Date, GETDATE()) > 50
+
+--Funcionários casados
+SELECT 
+    Employee_Id,
+    Employee_Name,
+    Marital_Status
+FROM  
+    Employees$
+WHERE Marital_Status = 'Married'
+
+
+-- Média de salário por cargo
+SELECT 
+    Title,
+    AVG(Salary) AS Media_Salarial
+FROM 
+    Employees$
+GROUP BY Title
+
+
+-- Preço mínimo e máximo dos produtos
+SELECT 
+    MIN(Unit_Price) AS Preco_Minimo,
+    MAX(Unit_Price) AS Preco_Maximo
+FROM 
+    Products$
